@@ -21,7 +21,6 @@ public class WorldLoader {
 			raf.seek(mbh.getResForkOffset());
 			model.read(raf, mbh.getResForkOffset());
 		} else {
-			//raf = new RandomAccessFile(file.getPath() + "/..namedfork/rsrc", "r");
 			raf = new RandomAccessFile(file.getPath(), "r");
 			model.read(raf);
 		}
@@ -236,8 +235,7 @@ public class WorldLoader {
 		if (menus != null) {
 			String[] appleMenu = readMenu(menus, 2001);
 			if (appleMenu != null) {
-				String aboutMenuItemName = appleMenu[1].split(";")[0];
-				world.setAboutMenuItemName(aboutMenuItemName);
+				world.setAboutMenuItemName(appleMenu[1].split(";")[0]);
 			}
 			String[] commandsMenu = readMenu(menus, 2004);
 			if (commandsMenu != null) {
@@ -493,8 +491,7 @@ public class WorldLoader {
 	
 	private static String readPascalString(DataInputStream in) throws IOException {
 		if (in.available() == 0) return "";
-		int length = in.readUnsignedByte();
-		byte[] data = new byte[length];
+		byte[] data = new byte[in.readUnsignedByte()];
 		in.read(data);
 		for (int i = 0; i < data.length; i++)
 			if (data[i] == (byte) 0x0D)
