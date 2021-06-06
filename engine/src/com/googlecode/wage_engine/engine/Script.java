@@ -181,19 +181,14 @@ public class Script {
 		} else if (lhs.value == rhs.value) {
 			result = true;
 		} else if (rhs.type == Operand.STRING) {
-			String str = rhs.value.toString();
+			String str = rhs.value.toString().toLowerCase();
+			String name;
 			if (lhs.value instanceof Chr) {
-				String name = ((Chr) lhs.value).getName();
-				if (partialMatch)
-					result = name.toLowerCase().indexOf(str.toLowerCase()) != -1;
-				else
-					result = name.toLowerCase().equals(str.toLowerCase());
+				name = ((Chr) lhs.value).getName().toLowerCase();
+				result = partialMatch ? name.indexOf(str) != -1 : name.equals(str);
 			} else if (lhs.value instanceof Obj) {
-				String name = ((Obj) lhs.value).getName();
-				if (partialMatch)
-					result = name.toLowerCase().indexOf(str.toLowerCase()) != -1;
-				else
-					result = name.toLowerCase().equals(str.toLowerCase());
+				name = ((Obj) lhs.value).getName().toLowerCase();
+				result = partialMatch ? name.indexOf(str) != -1 : name.equals(str);
 			}
 		}
 		return result;
@@ -213,11 +208,7 @@ public class Script {
 		}
 		if (op.equals("<") || op.equals(">")) {
 			// CLICK$<FOO only matches if there was a click
-			if (inputClick == null) {
-				result = false;
-			} else {
-				result = !result;
-			}
+			result = inputClick == null ? false : !result;
 		}
 		return result;
 	}
@@ -1138,14 +1129,12 @@ public class Script {
 	}
 
 	private void handleRestCommand() {
-		Chr player = world.getPlayer();
-		Chr enemy = callbacks.getMonster();
-		if (enemy != null) {
+		if (callbacks.getMonster() != null) {
 			appendText("This is no time to rest!");
 			callbacks.setCommandWasQuick();
 		} else {
 			callbacks.regen();
-			printPlayerCondition(player);
+			printPlayerCondition(world.getPlayer());
 		}
 	}
 
@@ -1154,15 +1143,10 @@ public class Script {
 		if (player.getState().getInventory().size() >= player.getMaximumCarriedObjects()) {
 			appendText("Your pack is full, you must drop something.");
 		} else {
-			world.move(obj, world.getPlayer());
+			world.move(obj, player);
 			int type = Engine.wearObjIfPossible(player, obj);
-			if (type == Chr.HEAD_ARMOR) {
-				appendText("You are now wearing the " + obj.getName() + ".");
-			} else if (type == Chr.BODY_ARMOR) {
-				appendText("You are now wearing the " + obj.getName() + ".");
-			} else if (type == Chr.SHIELD_ARMOR) {
-				appendText("You are now wearing the " + obj.getName() + ".");
-			} else if (type == Chr.MAGIC_ARMOR) {
+			if (type == Chr.HEAD_ARMOR || type == Chr.BODY_ARMOR || 
+					type == Chr.SHIELD_ARMOR || type == Chr.MAGIC_ARMOR) {
 				appendText("You are now wearing the " + obj.getName() + ".");
 			} else {
 				appendText("You now have the " + obj.getName() + ".");
@@ -1208,8 +1192,8 @@ public class Script {
 	}
 	
 	private void handleWearCommand(String target) {
-		Chr player = world.getPlayer();
-		for (Obj o : player.getState().getInventory()) {
+		Chr.State playerState = world.getPlayer().getState();
+		for (Obj o : playerState.getInventory()) {
 			if (target.contains(o.getName().toLowerCase())) {
 				if (o.getType() == Obj.HELMET) {
 					wearObj(o, Chr.HEAD_ARMOR);
@@ -1225,7 +1209,7 @@ public class Script {
 				break;
 			}
 		}
-		for (Obj o : player.getState().getCurrentScene().getState().getObjs()) {
+		for (Obj o : playerState.getCurrentScene().getState().getObjs()) {
 			if (target.contains(o.getName().toLowerCase())) {
 				appendText("First you must get the " + o.getName() + ".");
 				break;
@@ -1250,11 +1234,10 @@ public class Script {
 				return;
 			}
  		}
-		if (msg != null && msg.length() > 0) {
-			appendText(msg);
-		} else {
-			appendText("You can't go " + dirName + ".");
+		if (msg == null || msg.length() > 0) {
+			msg = "You can't go " + dirName + ".";
 		}
+		appendText(msg);
 	}
 
 	private String buildStringFromOffset(int offset, int length) {
@@ -1268,11 +1251,11 @@ public class Script {
 	public String toString() {
 		String s = buildStringFromOffset(12);
 		StringBuilder sb = new StringBuilder("  0: ");
-		int lineno = 1;
+		int lineNum = 1;
 		for (int i = 0; i < s.length(); i++) {
 			sb.append(s.charAt(i));
 			if (s.charAt(i) == '\n')
-				sb.append(String.format("%3d: ", lineno++));
+				sb.append(String.format("%3d: ", lineNum++));
 		} 
 		return sb.toString();
 	}
