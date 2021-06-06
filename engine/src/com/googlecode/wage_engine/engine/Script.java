@@ -485,7 +485,6 @@ public class Script {
 	}
 	
 	private void skipBlock() {
-		int fromIndex = index;
 		int nesting = 1;
 		while (index < data.length) {
 			if (data[index] == (byte) 0x80) { // IF
@@ -497,7 +496,6 @@ public class Script {
 				nesting--;
 				if (nesting == 0) {
 					index++;
-					//System.out.println("Skipped lines " + indexToLine(fromIndex) + " to " + indexToLine(index));
 					return;
 				}
 			} else switch (data[index]) {
@@ -1179,14 +1177,14 @@ public class Script {
 	}
 
 	private void wearObj(Obj o, int pos) {
-		Chr player = world.getPlayer();
-		if (player.getState().getArmor(pos) == o) {
+		Chr.State playerState = world.getPlayer().getState();
+		if (playerState.getArmor(pos) == o) {
 			appendText("You are already wearing the " + o.getName() + ".");
 		} else {
-			if (player.getState().getArmor(pos) != null) {
-				appendText("You are no longer wearing the " + player.getState().getArmor(pos).getName() + ".");
+			if (playerState.getArmor(pos) != null) {
+				appendText("You are no longer wearing the " + playerState.getArmor(pos).getName() + ".");
 			}
-			player.getState().setArmor(pos, o);
+			playerState.setArmor(pos, o);
 			appendText("You are now wearing the " + o.getName() + ".");
 		}
 	}
@@ -1261,24 +1259,14 @@ public class Script {
 	}
 
 	private String getCurrentLine() {
-		String[] lines = toString().split("\n");
-		int lineNumber = indexToLine(index);	
-		return lines[lineNumber];
+		return toString().split("\n")[indexToLine(index)];
 	}
 
 	private int indexToLine(int index) {
-		int loc = 0;
-		for (char c : buildStringFromOffset(12, index).toCharArray())
-			if (c == '\n')
-				loc++;
-		return loc - 1;
+		return (int) buildStringFromOffset(12, index).chars().filter(c -> c == '\n').count() - 1;
 	}
 	
 	public int countLines() {
-		int loc = 0;
-		for (char c : toString().toCharArray())
-			if (c == '\n')
-				loc++;
-		return loc;
+		return (int) toString().chars().filter(c -> c == '\n').count();
 	}
 }
