@@ -368,6 +368,17 @@ public class World {
 	public List<Scene> getOrderedScenes() {
 		return orderedScenes;
 	}
+	
+	public List<Scene> getNameOrderedScenes() {
+		List<Scene> nameOrderedScenes = new ArrayList<Scene>(orderedScenes);
+		Collections.sort(nameOrderedScenes, new Comparator<Scene>() {
+			@Override
+			public int compare (Scene lhs, Scene rhs) {
+				return lhs.getName().compareToIgnoreCase(rhs.getName());
+			}
+		});
+		return nameOrderedScenes;
+	}
 
 	public List<Sound> getOrderedSounds() {
 		return orderedSounds;

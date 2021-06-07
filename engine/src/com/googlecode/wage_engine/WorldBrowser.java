@@ -121,7 +121,7 @@ public class WorldBrowser extends JPanel {
 		panel.setLayout(new GridBagLayout());
 		panel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 		DefaultListModel model = new DefaultListModel();
-		for (Scene scene : world.getOrderedScenes())
+		for (Scene scene : world.getNameOrderedScenes())
 			model.addElement(scene);
 		model.removeElement(world.getStorageScene());
 		sceneList = new JList(model);
